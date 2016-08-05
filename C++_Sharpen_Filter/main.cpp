@@ -29,7 +29,6 @@ double result_time = 0;
 double timedifference_msec(struct timeval t0, struct timeval t1);
 bool Convolution3x3C(unsigned char *pSrc, unsigned char *pDest, unsigned int nImageWidth, unsigned int nImageHeight, unsigned int *ROIPoint, short *pKernel);
 bool Convolution3x3Instrinsic(unsigned char *pSrc, unsigned char *pDest, unsigned int nImageWidth, unsigned int nImageHeight, unsigned int *ROIPoint, short *pKernel);
-
 bool Convolution3x3Instrinsic2(unsigned char *pSrc, unsigned char *pDest, unsigned int nImageWidth, unsigned int nImageHeight, unsigned int *ROIPoint, short *pKernel);
 
 int main(int argc, const char * argv[]) {
@@ -210,8 +209,8 @@ bool Convolution3x3Instrinsic2(unsigned char *pSrc, unsigned char *pDest, unsign
     unsigned int nEndX = ROIPoint[2];
     unsigned int nEndY = ROIPoint[3];
     
-    if(0 == nStartX) nStartX = 1;	//« ≈Õ∏µ¿∏∑Œ ¿Œ«— ªÁ¿Ã¡Ó ø°∑Ø√≥∏Æ
-    if(0 == nStartY) nStartY = 1;	//« ≈Õ∏µ¿∏∑Œ ¿Œ«— ªÁ¿Ã¡Ó ø°∑Ø√≥∏Æ
+    if(0 == nStartX) nStartX = 1;	//필터링 에러 처리 
+    if(0 == nStartY) nStartY = 1;	//필터링 에러 처리 
     if(nImageWidth == nEndX) nEndX = nImageWidth - 1;
     if(nImageHeight == nEndY) nEndY = nImageHeight - 1;
     
@@ -338,20 +337,13 @@ bool Convolution3x3Instrinsic2(unsigned char *pSrc, unsigned char *pDest, unsign
             ResultLow = _mm_adds_epi16(ResultLow,ImageLow);
             
             ImageLow = _mm_loadu_si128((__m128i*)(iterSrc+1+nImageWidth));
-            //(x+1,y+1)16 byte ¿–±‚
-            
             ImageHigh = _mm_unpackhi_epi8(ImageLow,ZeroData);
-           
             ImageLow = _mm_unpacklo_epi8(ImageLow,ZeroData);
-            
-            
             ImageLow = _mm_mullo_epi16(ImageLow,Kernel[8]);
             ImageHigh = _mm_mullo_epi16(ImageHigh,Kernel[8]);
-            
             ResultHigh = _mm_adds_epi16(ResultHigh,ImageHigh);
             ResultLow = _mm_adds_epi16(ResultLow,ImageLow);
-            
-            
+
             ResultLow = _mm_packus_epi16(ResultLow,ResultHigh);
             
             _mm_storeu_si128( (__m128i*)iterDest,ResultLow);
